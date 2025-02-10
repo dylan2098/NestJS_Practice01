@@ -1,15 +1,25 @@
 import {
+  ArgumentMetadata,
   Body,
   Controller,
   Get,
   HttpException,
   HttpStatus,
   Param,
+  PipeTransform,
   Post,
+  Req,
+  UsePipes,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
+
+class ValidationPipe implements PipeTransform {
+  transform(value: any, metadata: ArgumentMetadata) {
+    return value;
+  }
+}
 
 @Controller('user')
 // default validation pipe
@@ -70,8 +80,12 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async findAll() {
+  async findAll(@Req() req: Request & { limit: number; role: string }) {
     const users = await this.userService.findAll();
+
+    //call request user
+    console.log('find all limit', req.limit);
+    console.log('find all limit', req.role);
 
     if (!users || users.length == 0) {
       throw new HttpException('Table empty', HttpStatus.FORBIDDEN);
@@ -83,11 +97,16 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(
+    @Param('id') id: string,
+    @Req() req: Request & { limit: number },
+  ) {
     const user = await this.userService.findOne(Number(id));
     if (!user) {
       throw new HttpException('Not found', HttpStatus.BAD_REQUEST);
     }
+
+    console.log('get id limit', req.limit);
 
     return {
       status: 200,
@@ -96,6 +115,7 @@ export class UserController {
   }
 
   @Post()
+  @UsePipes(new ValidationPipe())
   async create(@Body() body: CreateUserDto) {
     const payload: Partial<User> = {
       firstName: body.firstName,

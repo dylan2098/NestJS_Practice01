@@ -5,8 +5,12 @@ import { ValidationError } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // app.use(new LimitMiddleware().use); // su dung middleware
+
   app.useGlobalPipes(
     new ValidationPipe({
+      transform: true, // dữ liệu sẽ được chuyển đổi theo DTO
+      whitelist: true,
       exceptionFactory: (validationErrors: ValidationError[] = []) => {
         return new BadRequestException(
           validationErrors.map((error) => ({
@@ -16,6 +20,7 @@ async function bootstrap() {
       },
     }),
   );
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

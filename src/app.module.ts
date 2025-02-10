@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
@@ -24,4 +29,18 @@ import { User } from './modules/user/user.entity';
   controllers: [AppController],
   providers: [AppService],
 })
+// export class AppModule implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer.apply(LimitMiddleware).forRoutes(
+//       {
+//         path: '/user/*',
+//         method: RequestMethod.ALL,
+//       },
+//       {
+//         path: '/auth/*',
+//         method: RequestMethod.ALL,
+//       },
+//     );
+//   }
+// }
 export class AppModule {}
